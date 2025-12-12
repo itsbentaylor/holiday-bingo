@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Movie Bingo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #d32f2f;
+            --primary-dark: #9a0007;
+            --secondary: #2e7d32;
+            --secondary-dark: #005005;
+            --gold: #ffd700;
+            --bg: #0f1419;
+            --bg-light: #1a2332;
+            --text: #ffffff;
+            --text-muted: #b0b8c1;
+            --border: #2d3748;
+            --success: #4caf50;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--gold), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(20deg); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* Bingo Grid */
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+        }
+
+        .bingo-square {
+            aspect-ratio: 1;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .bingo-square:hover {
+            transform: scale(1.05);
+            border-color: var(--gold);
+            z-index: 1;
+        }
+
+        .bingo-square.selected {
+            border-color: var(--success);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .bingo-square.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: var(--success);
+            text-shadow: 2px 2px 4px var(--shadow);
+            z-index: 2;
+            animation: checkmark 0.3s ease;
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .bingo-square img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .bingo-square.selected img {
+            opacity: 0.4;
+        }
+
+        .movie-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 0.5rem 0.25rem;
+            font-size: 0.7rem;
+            text-align: center;
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--text);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: rgba(211, 47, 47, 0.1);
+        }
+
+        /* Bingo Alert */
+        .bingo-alert {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .bingo-alert.show {
+            display: flex;
+        }
+
+        .bingo-content {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            animation: bounceIn 0.5s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .bingo-content h2 {
+            font-size: 3rem;
+            margin: 0 0 1rem 0;
+            color: var(--gold);
+        }
+
+        .bingo-content p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-square {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg);
+        }
+
+        .legend-square.selected {
+            border-color: var(--success);
+            background: var(--bg);
+            position: relative;
+        }
+
+        .legend-square.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--success);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .bingo-grid {
+                gap: 0.25rem;
+                padding: 0.5rem;
+            }
+
+            .movie-title {
+                font-size: 0.6rem;
+                padding: 0.25rem;
+            }
+
+            .legend {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .bingo-content {
+                padding: 2rem 1rem;
+                margin: 1rem;
+            }
+
+            .bingo-content h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bingo-square.selected::after {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎄 Holiday Movie Bingo 🎬</h1>
+            <p class="subtitle">Click squares to mark them off • Get 5 in a row to win!</p>
+        </div>
+
+        <!-- Bingo Card Grid -->
+        <div class="bingo-grid" id="bingo-grid">
+            <!-- Grid will be generated by JavaScript -->
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-square"></div>
+                <span>Not Selected</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-square selected"></div>
+                <span>Selected</span>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-outline" onclick="clearSelections()">Clear Selections</button>
+        </div>
+
+        <!-- Bingo Alert -->
+        <div id="bingo-alert" class="bingo-alert">
+            <div class="bingo-content">
+                <h2>🎉 BINGO! 🎉</h2>
+                <p>You completed a line!</p>
+                <button class="btn btn-primary" onclick="dismissBingo()">Continue Playing</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Holiday movie data with poster URLs
+        const HOLIDAY_MOVIES = [
+            { id: 1, name: "Home Alone", poster: "Src/Home_Alone.jpg" },
+            { id: 2, name: "Elf", poster: "Src/Elf.jpg" },
+            { id: 3, name: "The Polar Express", poster: "Src/The_Polar_Express.jpg" },
+            { id: 4, name: "A Christmas Story", poster: "Src/A_Christmas_Story.jpg" },
+            { id: 5, name: "The Grinch", poster: "Src/The_Grinch.jpg" },
+            { id: 6, name: "Home Alone 2", poster: "Src/Home_Alone_2.jpg" },
+            { id: 7, name: "Miracle on 34th Street", poster: "Src/Miracle_on_34th_Street.jpg" },
+            { id: 8, name: "It's a Wonderful Life", poster: "Src/Its_a_Wonderful_Life.jpg" },
+            { id: 9, name: "The Santa Clause", poster: "Src/The_Santa_Clause.jpg" },
+            { id: 10, name: "National Lampoon's Christmas Vacation", poster: "Src/National_Lampoons_Christmas_Vacation.jpg" },
+            { id: 11, name: "Jingle All the Way", poster: "Src/Jingle_All_the_Way.jpg" },
+            { id: 12, name: "The Nightmare Before Christmas", poster: "Src/The_Nightmare_Before_Christmas.jpg" },
+            { id: 13, name: "Love Actually", poster: "Src/Love_Actually.jpg" },
+            { id: 14, name: "The Holiday", poster: "Src/The_Holiday.jpg" },
+            { id: 15, name: "Fred Claus", poster: "Src/Fred_Claus.jpg" },
+            { id: 16, name: "The Christmas Chronicles", poster: "Src/The_Christmas_Chronicles.jpg" },
+            { id: 17, name: "Klaus", poster: "Src/Klaus.jpg" },
+            { id: 18, name: "A Christmas Carol", poster: "Src/A_Christmas_Carol.jpg" },
+            { id: 19, name: "The Muppet Christmas Carol", poster: "Src/The_Muppet_Christmas_Carol.jpg" },
+            { id: 20, name: "White Christmas", poster: "Src/White_Christmas.jpg" },
+            { id: 21, name: "Die Hard", poster: "Src/Die_Hard.jpg" },
+            { id: 22, name: "The Family Stone", poster: "Src/The_Family_Stone.jpg" },
+            { id: 23, name: "Four Christmases", poster: "Src/Four_Christmases.jpg" },
+            { id: 24, name: "Last Christmas", poster: "Src/Last_Christmas.jpg" },
+            { id: 25, name: "Gremlins", poster: "Src/Gremlins.jpg" },
+            { id: 26, name: "Scrooged", poster: "Src/Scrooged.jpg" },
+            { id: 27, name: "Arthur Christmas", poster: "Src/Arthur_Christmas.jpg" },
+            { id: 28, name: "The Year Without a Santa Claus", poster: "Src/The_Year_Without_a_Santa_Claus.jpg" },
+            { id: 29, name: "Jack Frost", poster: "Src/Jack_Frost.jpg" },
+            { id: 30, name: "Rise of the Guardians", poster: "Src/Rise_of_the_Guardians.jpg" },
+            { id: 31, name: "Rudolph the Red-Nosed Reindeer", poster: "Src/Rudolph_the_Red-Nosed_Reindeer.jpg" },
+            { id: 32, name: "Frosty the Snowman", poster: "Src/Frosty_the_Snowman.jpg" },
+            { id: 33, name: "A Charlie Brown Christmas", poster: "Src/A_Charlie_Brown_Christmas.jpg" },
+            { id: 34, name: "How the Grinch Stole Christmas", poster: "Src/How_the_Grinch_Stole_Christmas.jpg" },
+            { id: 35, name: "Deck the Halls", poster: "Src/Deck_the_Halls.jpg" }
+        ];
+
+        let playerCard = [];
+        let selectedSquares = new Set();
+
+        // Fisher-Yates shuffle algorithm (proper random shuffle)
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Generate a random bingo card (25 unique movies)
+        function generateBingoCard() {
+            const shuffled = shuffleArray(HOLIDAY_MOVIES);
+            return shuffled.slice(0, 25);
+        }
+
+        // Display the bingo card
+        function displayBingoCard() {
+            const grid = document.getElementById('bingo-grid');
+            grid.innerHTML = '';
+            
+            playerCard.forEach((movie, index) => {
+                const square = document.createElement('div');
+                square.className = 'bingo-square';
+                square.dataset.index = index;
+                
+                const img = document.createElement('img');
+                img.src = movie.poster;
+                img.alt = movie.name;
+                img.loading = 'lazy';
+                
+                const title = document.createElement('div');
+                title.className = 'movie-title';
+                title.textContent = movie.name;
+                
+                square.appendChild(img);
+                square.appendChild(title);
+                
+                square.addEventListener('click', () => toggleSquare(index));
+                
+                grid.appendChild(square);
+            });
+        }
+
+        // Toggle square selection
+        function toggleSquare(index) {
+            const square = document.querySelector(`.bingo-square[data-index="${index}"]`);
+            
+            if (selectedSquares.has(index)) {
+                selectedSquares.delete(index);
+                square.classList.remove('selected');
+            } else {
+                selectedSquares.add(index);
+                square.classList.add('selected');
+            }
+            
+            // Check for bingo
+            checkForBingo();
+        }
+
+        // Check if player has bingo
+        function checkForBingo() {
+            const wins = [
+                // Rows
+                [0, 1, 2, 3, 4],
+                [5, 6, 7, 8, 9],
+                [10, 11, 12, 13, 14],
+                [15, 16, 17, 18, 19],
+                [20, 21, 22, 23, 24],
+                // Columns
+                [0, 5, 10, 15, 20],
+                [1, 6, 11, 16, 21],
+                [2, 7, 12, 17, 22],
+                [3, 8, 13, 18, 23],
+                [4, 9, 14, 19, 24],
+                // Diagonals
+                [0, 6, 12, 18, 24],
+                [4, 8, 12, 16, 20]
+            ];
+            
+            for (const combo of wins) {
+                if (combo.every(index => selectedSquares.has(index))) {
+                    showBingo();
+                    return;
+                }
+            }
+        }
+
+        // Show bingo alert
+        function showBingo() {
+            document.getElementById('bingo-alert').classList.add('show');
+        }
+
+        // Dismiss bingo alert
+        function dismissBingo() {
+            document.getElementById('bingo-alert').classList.remove('show');
+        }
+
+        // Generate a new card
+        function generateNewCard() {
+            if (selectedSquares.size > 0) {
+                if (!confirm('Generate a new card? This will clear your current selections.')) {
+                    return;
+                }
+            }
+            selectedSquares.clear();
+            playerCard = generateBingoCard();
+            displayBingoCard();
+        }
+
+        // Clear all selections
+        function clearSelections() {
+            if (selectedSquares.size === 0) {
+                return;
+            }
+            if (confirm('Are you sure you want to clear all selections?')) {
+                selectedSquares.clear();
+                document.querySelectorAll('.bingo-square').forEach(square => {
+                    square.classList.remove('selected');
+                });
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            playerCard = generateBingoCard();
+            displayBingoCard();
+        });
+    </script>
+</body>
+</html>
+

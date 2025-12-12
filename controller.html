@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller - Holiday Movie Bingo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="controller.css">
+    <!-- No external dependencies needed - using inline solution -->
+</head>
+<body>
+    <div class="container">
+        <!-- Phase 1: QR Code Display -->
+        <div id="qr-phase" class="phase active">
+            <div class="card">
+                <h1>🎮 Game Controller</h1>
+                <p class="subtitle">Players scan this QR code to join the game</p>
+                
+                <div class="qr-container">
+                    <div id="qrcode"></div>
+                </div>
+                
+                <div class="game-info">
+                    <p class="info-text">Game Session: <strong id="game-id"></strong></p>
+                    <p class="info-text">Players can scan the QR code with their phone camera</p>
+                </div>
+                
+                <button class="btn btn-primary btn-large" onclick="startGame()">
+                    Start Game
+                    <span class="btn-icon">▶️</span>
+                </button>
+                
+                <a href="index.html" class="btn-link">← Back to Home</a>
+            </div>
+        </div>
+        
+        <!-- Phase 2: Movie Display -->
+        <div id="game-phase" class="phase">
+            <div class="game-controller">
+                <div class="header">
+                    <h2>🎬 Holiday Movie Bingo</h2>
+                    <div class="progress">
+                        Movie <span id="current-movie">0</span> of <span id="total-movies">25</span>
+                    </div>
+                </div>
+                
+                <div class="movie-display">
+                    <div class="movie-poster-container">
+                        <img id="movie-poster" src="" alt="Movie Poster" class="movie-poster">
+                    </div>
+                    <h2 id="movie-name" class="movie-name"></h2>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="previousMovie()" id="prev-btn">
+                        <span class="btn-icon">◀️</span>
+                        Previous
+                    </button>
+                    <button class="btn btn-primary" onclick="nextMovie()" id="next-btn">
+                        Next
+                        <span class="btn-icon">▶️</span>
+                    </button>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-outline" onclick="resetGame()">
+                        🔄 New Game
+                    </button>
+                    <a href="index.html" class="btn btn-outline">
+                        🏠 Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+    <script src="controller.js"></script>
+</body>
+</html>
+

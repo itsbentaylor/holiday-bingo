@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host - Holiday Movie Bingo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #d32f2f;
+            --primary-dark: #9a0007;
+            --secondary: #2e7d32;
+            --secondary-dark: #005005;
+            --gold: #ffd700;
+            --bg: #0f1419;
+            --bg-light: #1a2332;
+            --text: #ffffff;
+            --text-muted: #b0b8c1;
+            --border: #2d3748;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .progress span {
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .movie-display {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .movie-poster-container {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto 2rem;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 48px var(--shadow);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+        }
+
+        .movie-name {
+            font-size: 3.5rem;
+            margin: 0;
+            color: var(--gold);
+            text-shadow: 3px 3px 6px var(--shadow);
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--text);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            color: var(--text);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: rgba(211, 47, 47, 0.1);
+        }
+
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .start-screen h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--gold);
+        }
+
+        .start-screen p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+        }
+
+        .instructions {
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin: 2rem auto;
+            max-width: 700px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            color: var(--text-muted);
+        }
+
+        .instructions li {
+            margin: 0.5rem 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Keyboard shortcuts hint */
+        .shortcuts {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .shortcuts kbd {
+            background: var(--bg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-family: monospace;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .progress {
+                font-size: 1.2rem;
+            }
+
+            .movie-name {
+                font-size: 2rem;
+            }
+
+            .movie-display {
+                padding: 2rem 1rem;
+                min-height: 500px;
+            }
+
+            .controls {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="start-screen">
+            <h2>🎮 Host Controller</h2>
+            <p>Call out movies for your Holiday Movie Bingo game!</p>
+            
+            <div class="instructions">
+                <h3>Instructions:</h3>
+                <ul>
+                    <li>Players should open the <strong>Player Page</strong> (link below) to get their bingo cards</li>
+                    <li>Each player will have a unique randomly generated card</li>
+                    <li>Click "Start Game" below to begin calling out movies</li>
+                    <li>Use the Next/Previous buttons (or arrow keys) to navigate</li>
+                    <li>Players mark their cards when they have the movie being shown</li>
+                </ul>
+            </div>
+
+            <a href="player.html" class="btn btn-secondary" style="margin-bottom: 2rem;">
+                🎯 Open Player Page
+            </a>
+
+            <button class="btn btn-primary btn-large" onclick="startGame()">
+                Start Game
+                <span class="btn-icon">▶️</span>
+            </button>
+            
+            <p style="color: var(--text-muted); margin-top: 2rem; font-size: 0.9rem;">
+                Share the player page link with everyone who wants to play!
+            </p>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden">
+            <div class="header">
+                <h1>🎬 Holiday Movie Bingo Host</h1>
+                <div class="progress">
+                    Movie <span id="current-movie">0</span> of <span id="total-movies">35</span>
+                </div>
+            </div>
+
+            <div class="movie-display">
+                <div class="movie-poster-container">
+                    <img id="movie-poster" src="" alt="Movie Poster" class="movie-poster">
+                </div>
+                <h2 id="movie-name" class="movie-name"></h2>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousMovie()" id="prev-btn">
+                    <span class="btn-icon">◀️</span>
+                    Previous
+                </button>
+                <button class="btn btn-primary" onclick="nextMovie()" id="next-btn">
+                    Next
+                    <span class="btn-icon">▶️</span>
+                </button>
+            </div>
+
+            <div class="shortcuts">
+                💡 Tip: Use <kbd>←</kbd> and <kbd>→</kbd> arrow keys to navigate
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-outline" onclick="resetGame()">
+                    🔄 Restart
+                </button>
+                <a href="player.html" class="btn btn-outline">
+                    🎯 Player Page
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Holiday movie data (same as player cards)
+        const HOLIDAY_MOVIES = [
+            { id: 1, name: "Home Alone", poster: "Src/Home_Alone.jpg" },
+            { id: 2, name: "Elf", poster: "Src/Elf.jpg" },
+            { id: 3, name: "The Polar Express", poster: "Src/The_Polar_Express.jpg" },
+            { id: 4, name: "A Christmas Story", poster: "Src/A_Christmas_Story.jpg" },
+            { id: 5, name: "The Grinch", poster: "Src/The_Grinch.jpg" },
+            { id: 6, name: "Home Alone 2", poster: "Src/Home_Alone_2.jpg" },
+            { id: 7, name: "Miracle on 34th Street", poster: "Src/Miracle_on_34th_Street.jpg" },
+            { id: 8, name: "It's a Wonderful Life", poster: "Src/Its_a_Wonderful_Life.jpg" },
+            { id: 9, name: "The Santa Clause", poster: "Src/The_Santa_Clause.jpg" },
+            { id: 10, name: "National Lampoon's Christmas Vacation", poster: "Src/National_Lampoons_Christmas_Vacation.jpg" },
+            { id: 11, name: "Jingle All the Way", poster: "Src/Jingle_All_the_Way.jpg" },
+            { id: 12, name: "The Nightmare Before Christmas", poster: "Src/The_Nightmare_Before_Christmas.jpg" },
+            { id: 13, name: "Love Actually", poster: "Src/Love_Actually.jpg" },
+            { id: 14, name: "The Holiday", poster: "Src/The_Holiday.jpg" },
+            { id: 15, name: "Fred Claus", poster: "Src/Fred_Claus.jpg" },
+            { id: 16, name: "The Christmas Chronicles", poster: "Src/The_Christmas_Chronicles.jpg" },
+            { id: 17, name: "Klaus", poster: "Src/Klaus.jpg" },
+            { id: 18, name: "A Christmas Carol", poster: "Src/A_Christmas_Carol.jpg" },
+            { id: 19, name: "The Muppet Christmas Carol", poster: "Src/The_Muppet_Christmas_Carol.jpg" },
+            { id: 20, name: "White Christmas", poster: "Src/White_Christmas.jpg" },
+            { id: 21, name: "Die Hard", poster: "Src/Die_Hard.jpg" },
+            { id: 22, name: "The Family Stone", poster: "Src/The_Family_Stone.jpg" },
+            { id: 23, name: "Four Christmases", poster: "Src/Four_Christmases.jpg" },
+            { id: 24, name: "Last Christmas", poster: "Src/Last_Christmas.jpg" },
+            { id: 25, name: "Gremlins", poster: "Src/Gremlins.jpg" },
+            { id: 26, name: "Scrooged", poster: "Src/Scrooged.jpg" },
+            { id: 27, name: "Arthur Christmas", poster: "Src/Arthur_Christmas.jpg" },
+            { id: 28, name: "The Year Without a Santa Claus", poster: "Src/The_Year_Without_a_Santa_Claus.jpg" },
+            { id: 29, name: "Jack Frost", poster: "Src/Jack_Frost.jpg" },
+            { id: 30, name: "Rise of the Guardians", poster: "Src/Rise_of_the_Guardians.jpg" },
+            { id: 31, name: "Rudolph the Red-Nosed Reindeer", poster: "Src/Rudolph_the_Red-Nosed_Reindeer.jpg" },
+            { id: 32, name: "Frosty the Snowman", poster: "Src/Frosty_the_Snowman.jpg" },
+            { id: 33, name: "A Charlie Brown Christmas", poster: "Src/A_Charlie_Brown_Christmas.jpg" },
+            { id: 34, name: "How the Grinch Stole Christmas", poster: "Src/How_the_Grinch_Stole_Christmas.jpg" },
+            { id: 35, name: "Deck the Halls", poster: "Src/Deck_the_Halls.jpg" }
+        ];
+
+        let currentMovieIndex = -1;
+        let gameMovies = [];
+
+        // Fisher-Yates shuffle algorithm
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Start the game
+        function startGame() {
+            // Shuffle the movies for random order
+            gameMovies = shuffleArray(HOLIDAY_MOVIES);
+            
+            // Hide start screen, show game screen
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            // Show first movie
+            currentMovieIndex = 0;
+            displayMovie();
+        }
+
+        // Display current movie
+        function displayMovie() {
+            if (currentMovieIndex < 0 || currentMovieIndex >= gameMovies.length) return;
+            
+            const movie = gameMovies[currentMovieIndex];
+            
+            document.getElementById('movie-poster').src = movie.poster;
+            document.getElementById('movie-poster').alt = movie.name;
+            document.getElementById('movie-name').textContent = movie.name;
+            document.getElementById('current-movie').textContent = currentMovieIndex + 1;
+            document.getElementById('total-movies').textContent = gameMovies.length;
+            
+            // Update button states
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            prevBtn.disabled = currentMovieIndex === 0;
+            nextBtn.disabled = currentMovieIndex === gameMovies.length - 1;
+        }
+
+        // Go to next movie
+        function nextMovie() {
+            if (currentMovieIndex < gameMovies.length - 1) {
+                currentMovieIndex++;
+                displayMovie();
+            }
+        }
+
+        // Go to previous movie
+        function previousMovie() {
+            if (currentMovieIndex > 0) {
+                currentMovieIndex--;
+                displayMovie();
+            }
+        }
+
+        // Reset game
+        function resetGame() {
+            if (confirm('Start over from the beginning with a new random order?')) {
+                currentMovieIndex = -1;
+                gameMovies = [];
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.remove('hidden');
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Only work when game screen is visible
+            if (document.getElementById('game-screen').classList.contains('hidden')) return;
+            
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                nextMovie();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                previousMovie();
+            }
+        });
+    </script>
+</body>
+</html>
+
